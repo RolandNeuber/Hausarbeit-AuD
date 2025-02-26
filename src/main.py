@@ -1,5 +1,6 @@
 import math
 import random
+from pprint import pprint
 
 type Node = Node
 
@@ -18,10 +19,13 @@ class Node:
 type Connection = Connection
 
 class Connection:
-    def __init__(self: Connection, node1: Node, node2: Node, capacity: float):
-        self.node1: Node = node1
-        self.node2: Node = node2
-        self.capacity: float = capacity
+    def __init__(self: Connection, start_node: int, end_node: int, capacity: int):
+        self.start_node: int = start_node
+        self.end_node: int = end_node
+        self.capacity: int = capacity
+    
+    def __repr__(self):
+        return str(self.__class__.__name__) + "(" + str(vars(self)).strip("{}") + ")"
 
 def read_position_file() -> list[Node]:
     # Einlesen der FNWNodePos.txt
@@ -33,23 +37,38 @@ def read_position_file() -> list[Node]:
             nodes.append(Node(int(args[0]), float(args[1]), float(args[2])))
     return nodes
 
-def read_capacity_file() -> tuple[int, list[Node], int]:
+def read_capacity_file() -> tuple[int, list[Connection], int]:
     # Einlesen der dataFNW4.txt
     # u_i u_j c(u_i, u_j)
     with open("src/dataFNW4.txt", "r") as data_file:
-        data_file.readline() # Überspringe Anzahl der Knoten
+        length = int(data_file.readline()) # Anzahl der Knoten
         
-        nodes: list[Node] = []
+        connections: list[Connection] = []
         for line in data_file.readlines():
-            nodes.append(line.split())
-        source_index = int(nodes[0][0]) # Quelle
-        drain_index = int(nodes[-1][0]) # Senke
+            args = line.split()
+            connections.append(Connection(int(args[0]), int(args[1]), int(args[2])))
+        source_index = 0 # Quelle
+        drain_index = length - 1 # Senke
 
-        return (source_index, nodes, drain_index)
+        return (source_index, connections, drain_index)
+
+def calculate_capacity(
+        source_partition: set[int], 
+        drain_partition: set[int], 
+        connections: list[Connection]
+    ):
+    total_capacity = 0
+    for connection in connections:
+        if connection.start_node in source_partition \
+        and connection.end_node in drain_partition:
+            total_capacity += connection.capacity
+
+    return total_capacity
+
 
 if __name__ == "__main__":
     nodes = read_position_file()
-    source_index, capacities, drain_index = read_capacity_file()
+    source_index, connections, drain_index = read_capacity_file()
     source = [node for node in nodes if node.index == source_index][0]
     drain = [node for node in nodes if node.index == drain_index][0]
     nodes.remove(source)
@@ -66,9 +85,15 @@ if __name__ == "__main__":
                 source_set.add(node.index)
             else:
                 drain_set.add(node.index)
-        final_source_set = source_set
-        final_drain_set = drain_set
+    
+        capacity = calculate_capacity(source_set, drain_set, connections)
 
-print(min_capacity)
-print(final_source_set)
-print(final_drain_set)
+        if capacity < min_capacity:
+            min_capacity = capacity
+
+    final_source_set = source_set
+    final_drain_set = drain_set
+
+    print(min_capacity)
+    print(final_source_set)
+    print(final_drain_set)

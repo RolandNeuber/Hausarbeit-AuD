@@ -1,0 +1,6 @@
+= Problemstellung
+// 1. Charakterisieren Sie kurz das Problem des maximalen Flusses und des minimalen Schnittes.
+Das Problem des maximalen und des minimalen Schnittes beschäftigt sich mit dem maximalen Fluss in Flussnetzwerken von einer Quelle zu einer Senke. Das Theorem besagt, dass die Kapazität des maximalen Flusses der Kapazität eines minimalen Schnittes entspricht.
+Intuitiv kann man sich vorstellen, dass in einem Flussnetzwerk eine Engstelle den maximalen Fluss beschränkt. Die Engstelle, die den Fluss am stärksten einschränkt, bestimmt dessen Kapazität.
+// Schreiben Sie ein Programm, welches den minimalen Cut des gegebenen FNW bestimmt. Verwenden Sie den Randomized MinCut Algorithmus aus der Vorlesung.
+Aufgabe dieser Arbeit ist die Bestimmung des minimalen Schnittes mit Hilfe des Randomized MinCut Algorithmus. Der Algorithmus ist in der Programmiersprache Python implementiert. Zusätzlich wird die Programmbibliotek NetworkX (https://networkx.org/) zur Darstellung der Netzwerke genutzt.

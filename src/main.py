@@ -1,17 +1,16 @@
 import math
 import random
-from pprint import pprint
+import matplotlib.pyplot as plt
+import networkx as nx
 
 type Node = Node
 
 class Node:
+    """Knotenklasse, die den Index und die Position eines Knotens speichert."""
     def __init__(self: Node, index: int, x: float, y: float) -> Node:
         self.index: int = index
         self.x: float = x
         self.y: float = y
-
-    def dist_to(self: Node, other: Node) -> float:
-        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
     
     def __repr__(self):
         return str(self.__class__.__name__) + "(" + str(vars(self)).strip("{}") + ")"
@@ -19,6 +18,7 @@ class Node:
 type Connection = Connection
 
 class Connection:
+    """Kantenklasse, die den Start, das Ende und die Kapazität der Verbindung im Netzwerk speichert."""
     def __init__(self: Connection, start_node: int, end_node: int, capacity: int):
         self.start_node: int = start_node
         self.end_node: int = end_node
@@ -28,6 +28,8 @@ class Connection:
         return str(self.__class__.__name__) + "(" + str(vars(self)).strip("{}") + ")"
 
 def read_position_file() -> list[Node]:
+    """Liest die Positionen und Indices der Knoten aus der \"FNWNodePos.txt\" aus.
+    Aus den Daten wird eine Liste von Knoten erzeugt."""
     # Einlesen der FNWNodePos.txt
     # u x_u y_u
     with open("src/FNWNodePos.txt", "r") as data_file:
@@ -38,6 +40,8 @@ def read_position_file() -> list[Node]:
     return nodes
 
 def read_capacity_file() -> tuple[int, list[Connection], int]:
+    """Liest die Kapazitäten von einem zu einem anderen Knoten aus der \"FNWNodePos.txt\" aus.
+    Aus den Daten werden die Indices für Quelle und Senke und eine Liste der Kapazitäten erzeugt."""
     # Einlesen der dataFNW4.txt
     # u_i u_j c(u_i, u_j)
     with open("src/dataFNW4.txt", "r") as data_file:
@@ -57,6 +61,7 @@ def calculate_capacity(
         drain_partition: set[int], 
         connections: list[Connection]
     ):
+    """Berechnet die Kapazität zwischen zwei Partitionen anhand der gegebenen Verbindungen."""
     total_capacity = 0
     for connection in connections:
         if connection.start_node in source_partition \
@@ -65,6 +70,18 @@ def calculate_capacity(
 
     return total_capacity
 
+def show_network(nodes: list[Node], connections: list[Connection], final_source_set: set[int]):
+    """Zeigt das Netzwerk mit Hilfe von NetworkX an. 
+    Grüne Knoten sind teil der Partition, die die Quelle beinhaltet, rote gehören zur anderen Partition."""
+    graph = nx.DiGraph()
+    graph.add_edges_from([(connection.start_node, connection.end_node) for connection in connections])
+    plt.figure(figsize=(5, 5))
+    pos = { node.index: (node.x, node.y) for node in nodes }
+    node_colors = ["green" if node.index in final_source_set else "red" for node in nodes]
+    edge_labels = { (connection.start_node, connection.end_node): connection.capacity for connection in connections }
+    nx.draw(graph, pos, with_labels=True, node_color=node_colors, edge_color='gray', node_size=200, arrows=True)
+    nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='black', font_size=12, rotate=False, )
+    plt.show()
 
 if __name__ == "__main__":
     nodes = read_position_file()
@@ -97,3 +114,8 @@ if __name__ == "__main__":
     print(min_capacity)
     print(final_source_set)
     print(final_drain_set)
+
+    nodes.append(source)
+    nodes.append(drain)
+
+    show_network(nodes, connections, final_source_set)

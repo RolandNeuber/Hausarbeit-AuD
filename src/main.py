@@ -81,7 +81,7 @@ def show_network(
     graph = nx.DiGraph()
     graph.add_edges_from([(connection.start_node, connection.end_node) for connection in connections])
     plt.figure(figsize=(5, 5))
-    print(nodes)
+    nodes.sort(key = lambda x: x.index)
     pos = { node.index: (node.x, node.y) for node in nodes }
     node_colors = ["green" if node.index in final_source_set else "red" for node in nodes]
     edge_labels = { (connection.start_node, connection.end_node): connection.capacity for connection in connections }

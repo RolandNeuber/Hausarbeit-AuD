@@ -2,6 +2,7 @@ import math
 import random
 import matplotlib.pyplot as plt
 import networkx as nx
+import sys
 
 type Node = Node
 
@@ -19,7 +20,7 @@ type Connection = Connection
 
 class Connection:
     """Kantenklasse, die den Start, das Ende und die Kapazität der Verbindung im Netzwerk speichert."""
-    def __init__(self: Connection, start_node: int, end_node: int, capacity: int):
+    def __init__(self: Connection, start_node: int, end_node: int, capacity: int) -> Connection:
         self.start_node: int = start_node
         self.end_node: int = end_node
         self.capacity: int = capacity
@@ -60,7 +61,7 @@ def calculate_capacity(
         source_partition: set[int], 
         drain_partition: set[int], 
         connections: list[Connection]
-    ):
+    ) -> int:
     """Berechnet die Kapazität zwischen zwei Partitionen anhand der gegebenen Verbindungen."""
     total_capacity = 0
     for connection in connections:
@@ -70,12 +71,17 @@ def calculate_capacity(
 
     return total_capacity
 
-def show_network(nodes: list[Node], connections: list[Connection], final_source_set: set[int]):
+def show_network(
+        nodes: list[Node], 
+        connections: list[Connection], 
+        final_source_set: set[int]
+    ) -> None:
     """Zeigt das Netzwerk mit Hilfe von NetworkX an. 
     Grüne Knoten sind teil der Partition, die die Quelle beinhaltet, rote gehören zur anderen Partition."""
     graph = nx.DiGraph()
     graph.add_edges_from([(connection.start_node, connection.end_node) for connection in connections])
     plt.figure(figsize=(5, 5))
+    print(nodes)
     pos = { node.index: (node.x, node.y) for node in nodes }
     node_colors = ["green" if node.index in final_source_set else "red" for node in nodes]
     edge_labels = { (connection.start_node, connection.end_node): connection.capacity for connection in connections }
@@ -83,17 +89,21 @@ def show_network(nodes: list[Node], connections: list[Connection], final_source_
     nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='black', font_size=12, rotate=False, )
     plt.show()
 
-if __name__ == "__main__":
-    nodes = read_position_file()
-    source_index, connections, drain_index = read_capacity_file()
+def randomized_min_cut(
+        nodes: list[Node], 
+        connections: list[Connection], 
+        source_index: int, 
+        drain_index: int, 
+        iterations: int
+    ) -> tuple[int, set[int], set[int]]:
+    """Berechnet randomisiert den minimalen Schnitt für einen gegebenen Graphen in einer festen Anzahl an Iterationen."""
     source = [node for node in nodes if node.index == source_index][0]
     drain = [node for node in nodes if node.index == drain_index][0]
     nodes.remove(source)
     nodes.remove(drain)
-    iterations = 1000
     min_capacity = math.inf
 
-    for i in range(iterations):
+    for _ in range(iterations):
         source_set = { source_index }
         drain_set = { drain_index }
 
@@ -106,16 +116,57 @@ if __name__ == "__main__":
         capacity = calculate_capacity(source_set, drain_set, connections)
 
         if capacity < min_capacity:
+            print(capacity, source_set, drain_set)
             min_capacity = capacity
-
-    final_source_set = source_set
-    final_drain_set = drain_set
-
-    print(min_capacity)
-    print(final_source_set)
-    print(final_drain_set)
+            final_source_set = source_set
+            final_drain_set = drain_set
 
     nodes.append(source)
     nodes.append(drain)
+    
+    return (min_capacity, final_source_set, final_drain_set)
 
+def verify_min_cut(
+        connections: list[Connection], 
+        source_index: int, 
+        drain_index: int
+    ) -> tuple[int, set[int], set[int]]:
+    graph = nx.DiGraph()
+    graph.add_edges_from(
+        [(connection.start_node, connection.end_node, { "capacity": connection.capacity }) for connection in connections]
+    )
+    min_capacity, (source_set, drain_set) = nx.minimum_cut(graph, source_index, drain_index, capacity="capacity")
+    return (min_capacity, source_set, drain_set)
+
+if __name__ == "__main__":
+    # Daten auslesen.
+    nodes = read_position_file()
+    source_index, connections, drain_index = read_capacity_file()
+
+    # Falls Befehlszeilenargument angegeben ist, Iterationen auf diesen Wert setzen, sonst auf 1000 zurückfallen.
+    if (len(sys.argv) >= 2):
+        iterations = int(sys.argv[1])
+    else:
+        iterations = 1000
+
+    # Minimalen Schnitt mit randomized MinCut-Algorithmus berechnen.
+    min_capacity, final_source_set, final_drain_set = \
+        randomized_min_cut(nodes, connections, source_index, drain_index, iterations)
+    print(f"Randomized MinCut-Ergebnis ({iterations} Iterationen): ")
+    print("MinCut-Wert: " + str(min_capacity))
+    print("Menge Q: " + str(final_source_set))
+    print("Menge S: " + str(final_drain_set))
+    # Darstellung des Graphen
     show_network(nodes, connections, final_source_set)
+
+    print()
+
+    # Minimalen Schnitt zur Verifikation mit NetworkX berechnen.
+    # Nutzt deterministischen preflow push-Algorithmus, kann daher andere Ergebnisse liefern.
+    min_capacity, final_source_set, final_drain_set = \
+        verify_min_cut(connections, source_index, drain_index)
+    print("Verifikation mit NetworkX: ")
+    print("MinCut-Wert: " + str(min_capacity))
+    print("Menge Q: " + str(final_source_set))
+    print("Menge S: " + str(final_drain_set))
+

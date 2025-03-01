@@ -1,0 +1,24 @@
+kargers_algorithm:
+    type: Article
+    title: Global Min-cuts in RNC, and Other Ramifications of a Simple Min-Cut Algorithm
+    author: Karger, David R.
+    page-total: 10
+    date: 1992-10-30
+
+networkx_mincut_doc:
+    type: Reference
+    title: NetworkX 3.4.2 documentation
+    organization: NetworkX
+    url: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.flow.minimum_cut.html
+
+networkx:
+    type: Reference
+    title: NetworkX Network Analysis in Python
+    organization: NetworkX
+    url: https://networkx.org
+
+matplotlib:
+    type: Reference
+    title: "Matplotlib: Visualization with Python"
+    organization: Matplotlib
+    url: https://matplotlib.org

@@ -1,7 +1,7 @@
 #set page(numbering: "1")
 #set par(leading: 1.20em)
 #set block(spacing: 1.20em)
-#set text(size: 12pt)
+#set text(size: 12pt, lang: "de")
 
 #align(center)[
     #text(17pt)[
@@ -43,6 +43,9 @@
 #outline(title: "Inhaltsverzeichnis")
 
 #pagebreak()
+
+#import "4-literaturverzeichnis.typ": bib_state
+#bib_state.update(none)
 
 #include "1-problemstellung.typ"
 #include "2-lösung.typ"

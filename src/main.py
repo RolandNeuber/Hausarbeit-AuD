@@ -116,7 +116,6 @@ def randomized_min_cut(
         capacity = calculate_capacity(source_set, drain_set, connections)
 
         if capacity < min_capacity:
-            print(capacity, source_set, drain_set)
             min_capacity = capacity
             final_source_set = source_set
             final_drain_set = drain_set
@@ -131,6 +130,7 @@ def verify_min_cut(
         source_index: int, 
         drain_index: int
     ) -> tuple[int, set[int], set[int]]:
+    """Verifiziert den minimalen Schnitt mit Hilfe von NetworkX."""
     graph = nx.DiGraph()
     graph.add_edges_from(
         [(connection.start_node, connection.end_node, { "capacity": connection.capacity }) for connection in connections]
@@ -156,17 +156,17 @@ if __name__ == "__main__":
     print("MinCut-Wert: " + str(min_capacity))
     print("Menge Q: " + str(final_source_set))
     print("Menge S: " + str(final_drain_set))
-    # Darstellung des Graphen
-    show_network(nodes, connections, final_source_set)
 
     print()
 
     # Minimalen Schnitt zur Verifikation mit NetworkX berechnen.
     # Nutzt deterministischen preflow push-Algorithmus, kann daher andere Ergebnisse liefern.
-    min_capacity, final_source_set, final_drain_set = \
+    min_capacity_ver, final_source_set_ver, final_drain_set_ver = \
         verify_min_cut(connections, source_index, drain_index)
     print("Verifikation mit NetworkX: ")
-    print("MinCut-Wert: " + str(min_capacity))
-    print("Menge Q: " + str(final_source_set))
-    print("Menge S: " + str(final_drain_set))
+    print("MinCut-Wert: " + str(min_capacity_ver))
+    print("Menge Q: " + str(final_source_set_ver))
+    print("Menge S: " + str(final_drain_set_ver))
 
+    # Darstellung des Graphen
+    show_network(nodes, connections, final_source_set)

@@ -1,6 +1,11 @@
 #import "4-literaturverzeichnis.typ": bib_state
 #context bib_state.get()
 
+// TODO
+// Vorteile und Nachteile des Algorithmus im Vergleich zu deterministischen Methoden
+// Explizite Erwähnung von den Dateien dataFNW4.txt oder FNWNodePos.txt. Darlegung, wie die Daten aus diesen Dateien ins Programm integriert wurden.
+// Mehr akademische Quellen oder weitere Vergleiche zu deterministischen Algorithmen eingebracht werden.
+
 = Problemstellung
 // 1. Charakterisieren Sie kurz das Problem des maximalen Flusses und des minimalen Schnittes.
 Das Problem des maximalen und des minimalen Schnittes beschäftigt sich mit dem maximalen Fluss in Flussnetzwerken von einer Quelle zu einer Senke. Das Theorem besagt, dass die Kapazität des maximalen Flusses der Kapazität eines minimalen Schnittes entspricht.

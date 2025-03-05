@@ -74,20 +74,28 @@ def calculate_capacity(
 def show_network(
         nodes: list[Node], 
         connections: list[Connection], 
-        final_source_set: set[int]
+        final_source_set: set[int],
+        source_index: int, 
+        drain_index: int
     ) -> None:
     """Zeigt das Netzwerk mit Hilfe von NetworkX an. 
     Grüne Knoten sind teil der Partition, die die Quelle beinhaltet, rote gehören zur anderen Partition."""
     graph = nx.DiGraph()
-    graph.add_edges_from([(connection.start_node, connection.end_node) for connection in connections])
+    # graph.add_edges_from([(connection.start_node, connection.end_node) for connection in connections])
+    graph.add_edges_from(
+        [(connection.start_node, connection.end_node, { "capacity": connection.capacity }) for connection in connections]
+    ) 
     plt.figure(figsize=(5, 5))
     nodes.sort(key = lambda x: x.index)
     pos = { node.index: (node.x, node.y) for node in nodes }
     node_colors = ["green" if node.index in final_source_set else "red" for node in nodes]
-    edge_labels = { (connection.start_node, connection.end_node): connection.capacity for connection in connections }
+    _, flow_dict = nx.maximum_flow(graph, _s=source_index, _t=drain_index, capacity="capacity")
+    print(flow_dict)
+    edge_labels = { (connection.start_node, connection.end_node): f"{flow_dict[connection.start_node][connection.end_node]}/{connection.capacity}" for connection in connections }
     nx.draw(graph, pos, with_labels=True, node_color=node_colors, edge_color='gray', node_size=200, arrows=True)
     nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='black', font_size=12, rotate=False, )
     plt.show()
+    
 
 def randomized_min_cut(
         nodes: list[Node], 
@@ -169,4 +177,4 @@ if __name__ == "__main__":
     print("Menge S: " + str(final_drain_set_ver))
 
     # Darstellung des Graphen
-    show_network(nodes, connections, final_source_set)
+    show_network(nodes, connections, final_source_set, source_index, drain_index)

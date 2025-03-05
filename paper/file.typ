@@ -51,6 +51,9 @@
 #include "2-lösung.typ"
 // Randomized MinCut Algorithmus 
 #include "3-programmbedienung.typ"
+
+#pagebreak()
+
 // Implementierung des Algorithmus/Lösung des Problems
 #include "4-literaturverzeichnis.typ"
 

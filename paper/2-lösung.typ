@@ -19,18 +19,34 @@
 // tices aus Q werden mit rot eingef¨arbt, die zu S geh¨origen sind ockerfarben.
 // Der MinCut Wert (also der maximale Fluss) ist 9, also OK!
 
-Da das Finden zu den NP-vollständigen Problemen gehört (Quelle!), bietet sich eine heuristische Lösung an. Der Randomized MinCut Algorithmus @kargers_algorithm ist ein entsprechender heuristischer Ansatz. Der Algorithmus ist, wie der Name impliziert, randomisiert und konvergiert stochastisch gegen die optimale Lösung.
+Um das Laufzeitverhalten von Algorithmen zu verbessern können oft schnellere Algorithmen zur Nährung verwendet werden. Der Randomized MinCut Algorithmus @kargers_algorithm ist ein entsprechender heuristischer Ansatz für das Problem des minimalen Schnittes. Der Algorithmus ist, wie der Name impliziert, randomisiert und konvergiert stochastisch gegen die optimale Lösung.
 Die Idee des Algorithmus ist folgende:
-Zunächst wird die kleinste gefundene Kapazität mit $oo$ initialisiert.
+Zunächst wird die kleinste gefundene Kapazität mit $oo$ initialisiert. 
+
+$c_min = oo$
+
 Alle Knoten werden (außer Quelle und Senke) zufällig mit Wahrscheinlichkeit $1/2$ auf zwei Partitionen (Q und S) aufgeteilt, wovon eine die Quelle und die andere die Senke beinhaltet.
-Im nächsten Schritt wird die Kapazität zwischen beiden Partitionen bestimmt. Diese entspricht der Summe aller einzelenen Kapazitäten von jedem Knoten in Q zu jedem Knoten in S (Formel angeben).
-Ist die gefundene Kapazität kleiner als die zuvor gefundenen Kapazitäten, wird die kleinste gefundenene Kapazität auf den neuen Wert aktualisiert. Die Mengen Q und S werden ebenfalls in einer Variablen gespeichert.
+Im nächsten Schritt wird die Kapazität zwischen beiden Partitionen bestimmt. Diese entspricht der Summe aller einzelenen Kapazitäten von jedem Knoten in Q zu jedem Knoten in S. 
+
+$c_a = sum c_"ij" | i in Q, j in S$
+
+Ist die gefundene Kapazität kleiner als die zuvor gefundenen Kapazitäten, wird die kleinste gefundenene Kapazität auf den neuen Wert aktualisiert. 
+
+$c_min = min(c_min, c_a)$
+
+Die Mengen Q und S werden ebenfalls in einer Variablen gespeichert. 
+
+($Q_"fin" = Q, S_"fin" = S$)
+
 Die Schritte ab der Partitionierung werden so oft wiederholt bis eine "ausreichend gute" Nährung für den minimalen Schnitt gefunden wurde.
 Dabei ist zu beachten, dass die gefundene Lösung in jeder Iteration den minimalen Schnitt/maximalen Fluss von oben annähert, also größer gleich dem tatsächlichen Wert ist.
+
+Der ursprüngliche Algorithmus arbeitet mit einer "Kontraktion" von Kanten. Dabei werden zwei Knoten zu einem zusammengefasst (die Quelle und Senke dürfen nicht zusammengefasst werden), solange bis nur noch zwei Knoten übrig sind. Die Knoten in dem Knoten, in dem auch Quelle zusammengefasst wurde, zusammengefasst sind, entsprechen logisch der Menge Q. Der Rest der Knoten ist Teil der Menge S. 
 
 == Implementierung
 Der eigentliche MinCut-Algorithmus ist in der Pythonfunktion `randomized_min_cut` implementiert. Die Funktion nimmt die Liste der Knoten, deren gerichtete Verbindungen, den Index bzw. die Nummer der Quelle und Senke und die Anzahl der Iterationen entgegen. 
 Die Funktion gibt den berechneten Wert für den minimalen Schnitt, sowie die Mengen Q und S als Tupel zurück.
+
 ```python
 def randomized_min_cut(
         nodes: list[Node], 
@@ -39,45 +55,25 @@ def randomized_min_cut(
         drain_index: int, 
         iterations: int
     ) -> tuple[int, set[int], set[int]]:
-    """Berechnet randomisiert den minimalen Schnitt für einen gegebenen Graphen in einer festen Anzahl an Iterationen."""
-    source = [node for node in nodes if node.index == source_index][0]
-    drain = [node for node in nodes if node.index == drain_index][0]
-    nodes.remove(source)
-    nodes.remove(drain)
-    min_capacity = math.inf
-
-    for _ in range(iterations):
-        source_set = { source_index }
-        drain_set = { drain_index }
-
-        for node in nodes:
-            if random.randint(0, 1) == 0:
-                source_set.add(node.index)
-            else:
-                drain_set.add(node.index)
-    
-        capacity = calculate_capacity(source_set, drain_set, connections)
-
-        if capacity < min_capacity:
-            min_capacity = capacity
-            final_source_set = source_set
-            final_drain_set = drain_set
-
-    nodes.append(source)
-    nodes.append(drain)
-    
+    ...    
     return (min_capacity, final_source_set, final_drain_set)
 ```
+
 Die Implementierung in Python entspricht im Wesentlichem dem Pseudocode.
 Die Kapazität wird mit $oo$ initialisiert.
+
 ```python
 min_capacity = math.inf
 ```
+
 Danach wird eine feste Anzahl an Iterationen durchgeführt.
+
 ```python
 for _ in range(iterations):
 ```
+
 Darin werden alle Knoten bis auf Quelle und Senke zufällig auf die Mengen Q und S aufgeteilt.
+
 ```python
 for node in nodes:
     if random.randint(0, 1) == 0:
@@ -85,23 +81,29 @@ for node in nodes:
     else:
         drain_set.add(node.index)
 ```
+
 Zwischen den generierten Partitionen wird jeweils die Kapazität berechnet.
+
 ```python
 capacity = calculate_capacity(source_set, drain_set, connections)
 ```
+
 Wenn die berechnete Kapazität kleiner ist als alle vorherigen, wird die minimale Kapazität und die zugehörige Partitionierung aktualisiert.
+
 ```python
 if capacity < min_capacity:
     min_capacity = capacity
     final_source_set = source_set
     final_drain_set = drain_set
 ```
+
 Nachdem alle Iterationen durchlaufen sind, werden die berechnete Kapazität, Q und S zurückgegeben.
+
 ```python
 return (min_capacity, final_source_set, final_drain_set)
 ```
 
-=== Berechnung der Kapazität zwischen Partitionen
+== Berechnung der Kapazität zwischen Partitionen
 Die Bestimmung der Kapazität zwischen den zwei zufällig gewählten Partionen Q und S wird in der Funktion `calculate_capacity` durchgeführt.
 Diese nimmt die zwei Partionen und die Liste aller (!) Verbindungen des Netzwerkes entgegen. Streng genommen würden die Verbindungen mit Startknoten in Q und Endknoten in S genügen, die Filterung passiert zur Vereinfachung aber erst innerhalb der Funktion selbst.
 Am Ende wird die Gesamtkapazität von Q nach S zurückgegeben.
@@ -179,6 +181,8 @@ Menge S: {1, 3, 4, 6, 7, 8, 9}
   ],
 )
 
+Welche der Partionierungen dabei zurückgegeben wird, ist vom Zufall abhängig. Es ist ebenfalls möglich, dass eine suboptimale Lösung zurückgegeben wird. Um die Wahrscheinlichkeit für suboptimale Lösungen zu verringern, kann die Anzahl der Iterationen erhöht werden. Allerdings kann nicht garantiert werden, dass eine optimale Lösung gefunden wird.
+
 == Verifikation der Ergebnisse
 
 Zur Verifikation der Ergebnisse wurde die Programmbibliotek `NetworkX` genutzt.
@@ -190,3 +194,5 @@ MinCut-Wert: 34
 Menge Q: {0, 2, 5}
 Menge S: {1, 3, 4, 6, 7, 8, 9}
 `
+
+Entsprechend liefert NetworkX auch nur eine der möglichen optimalen Lösungen zurück. Da der Wert des minimalen Schnittes von NetworkX mit dem der eigenen Implementierung übereinstimmt, kann diese nicht falsifiziert werden. Die Übereinstimmung legt zwar nahe, dass die Implementierung korrekt ist, ist aber kein Beweis.

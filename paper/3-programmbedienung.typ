@@ -13,5 +13,12 @@ Das obige Beispiel führt den Randomized MinCut-Algorithmus mit `350` Iteratione
 
 == Programmausgabe
 Das Programm gibt in der Konsole das Ergebnis des Algorithmus, bestehend aus dem minimalen Schnitt und den Mengen Q und S, zurück.
-Zur Verifikation wird der minimale Schnitt zusätzlich mit der Bibliothek NetworkX berechnet.
+Zur Verifikation wird der minimale Schnitt zusätzlich mit der Bibliothek NetworkX berechnet. 
+Die Ausgabe erfolgt nach dem gleichen Schema, wie in 2.3 bereits gezeigt:
+`
+Randomized MinCut-Ergebnis (n Iterationen): 
+MinCut-Wert: x
+Menge Q: {a, b, c, ...}
+Menge S: {r, s, t, ...}
+`
 Das Netzwerk zusammen mit den berechneten Mengen Q und S wird mit Hilfe von Matplotlib dargestellt.

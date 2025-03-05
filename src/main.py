@@ -92,8 +92,9 @@ def show_network(
     _, flow_dict = nx.maximum_flow(graph, _s=source_index, _t=drain_index, capacity="capacity")
     print(flow_dict)
     edge_labels = { (connection.start_node, connection.end_node): f"{flow_dict[connection.start_node][connection.end_node]}/{connection.capacity}" for connection in connections }
-    nx.draw(graph, pos, with_labels=True, node_color=node_colors, edge_color='gray', node_size=200, arrows=True)
-    nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='black', font_size=12, rotate=False, )
+    edge_widths = [(flow_dict[s][e] / 2 + 1) for s, e in graph.edges()]
+    nx.draw(graph, pos, with_labels=True, node_color=node_colors, edge_color='gray', node_size=200, arrows=True, width=edge_widths)
+    nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='black', font_size=10, rotate=False)
     plt.show()
     
 

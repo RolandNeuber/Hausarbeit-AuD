@@ -43,6 +43,24 @@ Dabei ist zu beachten, dass die gefundene Lösung in jeder Iteration den minimal
 
 Der ursprüngliche Algorithmus arbeitet mit einer "Kontraktion" von Kanten. Dabei werden zwei Knoten zu einem zusammengefasst (die Quelle und Senke dürfen nicht zusammengefasst werden), solange bis nur noch zwei Knoten übrig sind. Die Knoten in dem Knoten, in dem auch Quelle zusammengefasst wurde, zusammengefasst sind, entsprechen logisch der Menge Q. Der Rest der Knoten ist Teil der Menge S. 
 
+== Deserialisierung des Flussnetzwerkes
+// Explizite Erwähnung von den Dateien dataFNW4.txt oder FNWNodePos.txt. Darlegung, wie die Daten aus diesen Dateien ins Programm integriert wurden.
+Die Dateien "dataFNW4.txt" und "FNWNodePos.txt" werden mit Hilfe folgender Python-Funktionen ausgelesen:
+
+```Python
+def read_capacity_file() -> tuple[int, list[Connection], int]:
+```
+
+Das Auslesen der Datei "dataFNW4.txt" liefert ein Tupel aus dem Index der Quelle, einer Liste der Kanten mit zugehörigem Gewicht und dem Index der Senke.
+
+
+```Python
+def read_position_file() -> list[Node]:
+```
+
+Das Auslesen der Datei "FNWNodePos.txt" liefert eine Liste der Knoten mit Koordinaten.
+Die Daten werden dabei in den Datenklassen `Node` (dt. Knoten) und `Connection` (dt. Verbindung) gehalten, um später einfach darauf zugreifen zu können.
+
 == Implementierung
 Der eigentliche MinCut-Algorithmus ist in der Pythonfunktion `randomized_min_cut` implementiert. Die Funktion nimmt die Liste der Knoten, deren gerichtete Verbindungen, den Index bzw. die Nummer der Quelle und Senke und die Anzahl der Iterationen entgegen. 
 Die Funktion gibt den berechneten Wert für den minimalen Schnitt, sowie die Mengen Q und S als Tupel zurück.
@@ -126,26 +144,32 @@ def calculate_capacity(
 
 Die Implementierung entspricht wieder im Wesentlichen dem Pseudocode.
 Die Kapazität wird mit 0 initialisiert.
+
 ```python
 total_capacity = 0
 ```
+
 Danach wird über alle Verbindung des Netzwerkes iteriert.
+
 ```python
 for connection in connections:
 ```
 
 Dabei werden nur jene Verbindungen beachtet, die ihren Startknoten in Q und ihren Endknoten in S haben.
+
 ```python
 if connection.start_node in source_partition \
         and connection.end_node in drain_partition:
 ```
 
 Für all diese Verbindungen wird die Kapazität auf die Gesamtkapazität aufaddiert.
+
 ```python
 total_capacity += connection.capacity
 ```
 
 Und am Ende wird die Gesamtkapazität zurückgegeben.
+
 ```python
 return total_capacity
 ```
@@ -187,7 +211,6 @@ Welche der Partionierungen dabei zurückgegeben wird, ist vom Zufall abhängig. 
 
 Zur Verifikation der Ergebnisse wurde die Programmbibliotek `NetworkX` genutzt.
 Diese stellt die Funktion `minimum_cut`, die den minimalen Schnitt deterministisch mit dem Algorithmus "preflow push" berechnet. @networkx_mincut_doc
-
 `
 Verifikation mit NetworkX: 
 MinCut-Wert: 34
